@@ -38,6 +38,11 @@ def get_all_video_in_channel():
     return video_links
 
 def post_to_vk(message, session):
+    # hack for youtube: we cant have correct link if we not upload this as video
+    if (message.startswith("https://www.youtube.com")):
+        vk_api.VkUpload(session).video(group_id=Config['Vk']['Owner'][1:], link=message)
+        return
+
     vk = session.get_api()
     vk.wall.post(owner_id=Config['Vk']['Owner'], from_group=1, attachments=message)
 
