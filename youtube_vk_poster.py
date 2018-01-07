@@ -39,7 +39,7 @@ def get_all_video_in_channel():
 
 def post_to_vk(message, session):
     vk = session.get_api()
-    vk.wall.post(owner_id=Config['Vk']['Owner'], from_group=1, message=message)
+    vk.wall.post(owner_id=Config['Vk']['Owner'], from_group=1, attachments=message)
 
 
 def main():
@@ -47,18 +47,19 @@ def main():
     if (Config.sections() != ['YouTube', 'Vk']):
         print("Wrong Configs")
         return
-    print (get_all_video_in_channel())
+    videos = get_all_video_in_channel()
 
     login = Config['Vk']['Login']
-    token = Config['Vk']['Token']
-    vk_session = vk_api.VkApi(login=login, token=token)
+    password = Config['Vk']['Password']
+    app_id = Config['Vk']['AppId']
+    vk_session = vk_api.VkApi(login, password, app_id=app_id)
 
     try:
         vk_session.auth()
     except vk_api.AuthError as error_msg:
         print(error_msg)
         return
-    post_to_vk("test_git_token", vk_session)
+    post_to_vk(videos[-1], vk_session)
 
 if __name__ == "__main__":
     main()
