@@ -7,9 +7,12 @@ Created on Sun Jan  7 17:48:39 2018
 
 import configparser
 Config = configparser.ConfigParser()
+
 import vk_api
 
 import urllib, json
+
+videos_vk = []
 
 def get_all_video_in_channel():
     api_key = Config['YouTube']['ApiKey']
@@ -46,13 +49,33 @@ def post_to_vk(message, session):
     vk = session.get_api()
     vk.wall.post(owner_id=Config['Vk']['Owner'], from_group=1, attachments=message)
 
+def vk_try_get_url(item, session):
+    global videos_vk
+    try:
+        vk = session.get_api()
+        id = item['attachments'][0]['video']['id']
+        videos_str = Config['Vk']['Owner']+"_"+str(id)
+        video = vk.video.get(videos=videos_str)
+        url = video['items'][0]['player']
+        url = url.replace('?__ref=vk.api', '')
+        url = url.replace('https://www.youtube.com/embed/', '')
+        url = 'https://www.youtube.com/watch?v=' + url
+        videos_vk.append(url)
+    except:
+        pass
+
+def vk_get_all_videos(session):
+    tools = vk_api.VkTools(session)
+    wall = tools.get_all('wall.get', 100, {'owner_id': Config['Vk']['Owner']})
+    for item in wall['items']:
+        vk_try_get_url(item, session)
 
 def main():
     Config.read("conf.ini")
     if (Config.sections() != ['YouTube', 'Vk']):
         print("Wrong Configs")
         return
-    videos = get_all_video_in_channel()
+    videos_youtube = get_all_video_in_channel()
 
     login = Config['Vk']['Login']
     password = Config['Vk']['Password']
@@ -64,7 +87,10 @@ def main():
     except vk_api.AuthError as error_msg:
         print(error_msg)
         return
-    post_to_vk(videos[-1], vk_session)
-
+    
+    #post_to_vk(videos[-1], vk_session)
+    vk_get_all_videos(vk_session)
+    print(videos_vk, videos_youtube[-1])
+    
 if __name__ == "__main__":
     main()
