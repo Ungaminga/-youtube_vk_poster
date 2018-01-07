@@ -1,0 +1,10 @@
+# Переименуй меня в conf.ini и удали строки с комментариями
+
+[YouTube]
+ApiKey = # Апи ключ отсюда: https://console.developers.google.com/apis/api/youtube.googleapis.com следуя этому мануалу: https://developers.google.com/youtube/v3/getting-started
+ChannelId = # https://www.youtube.com/channel/-> ID <- То, что после слэшей.
+
+[Vk]
+login = # Твой логин
+password = # Пароль
+owner = # От кого пишем пост. Для групп - вначале пишем минус, для простого пользователя - без минуса.
