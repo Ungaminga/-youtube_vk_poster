@@ -5,6 +5,6 @@ ApiKey = # Апи ключ отсюда: https://console.developers.google.com/a
 ChannelId = # https://www.youtube.com/channel/-> ID <- То, что после слэшей.
 
 [Vk]
-login = # Твой логин
-password = # Пароль
-owner = # От кого пишем пост. Для групп - вначале пишем минус, для простого пользователя - без минуса.
+Login = # Твой логин
+Token = # VkApi Token
+Owner = # От кого пишем пост. Для групп - вначале пишем минус, для простого пользователя - без минуса.

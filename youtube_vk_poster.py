@@ -7,9 +7,10 @@ Created on Sun Jan  7 17:48:39 2018
 
 import configparser
 Config = configparser.ConfigParser()
+import vk_api
 
-import urllib
-import json
+import urllib, json
+
 def get_all_video_in_channel():
     api_key = Config['YouTube']['ApiKey']
     channel_id = Config['YouTube']['ChannelId']
@@ -36,12 +37,28 @@ def get_all_video_in_channel():
             break
     return video_links
 
+def post_to_vk(message, session):
+    vk = session.get_api()
+    vk.wall.post(owner_id=Config['Vk']['Owner'], from_group=1, message=message)
+
+
 def main():
     Config.read("conf.ini")
     if (Config.sections() != ['YouTube', 'Vk']):
         print("Wrong Configs")
         return
     print (get_all_video_in_channel())
+
+    login = Config['Vk']['Login']
+    token = Config['Vk']['Token']
+    vk_session = vk_api.VkApi(login=login, token=token)
+
+    try:
+        vk_session.auth()
+    except vk_api.AuthError as error_msg:
+        print(error_msg)
+        return
+    post_to_vk("test_git_token", vk_session)
 
 if __name__ == "__main__":
     main()
