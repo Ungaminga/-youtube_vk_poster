@@ -14,6 +14,10 @@ import urllib, json
 
 videos_vk = []
 
+import time
+day_today = int(time.time())//60//60//24
+video_posted_today = 0 # count of videos was posted this day
+
 def get_all_video_in_channel():
     api_key = Config['YouTube']['ApiKey']
     channel_id = Config['YouTube']['ChannelId']
@@ -50,7 +54,7 @@ def post_to_vk(message, session):
     vk.wall.post(owner_id=Config['Vk']['Owner'], from_group=1, message=message)
 
 def vk_try_get_url(item, session):
-    global videos_vk
+    global videos_vk, video_posted_today
     try:
         vk = session.get_api()
         id = item['attachments'][0]['video']['id']
@@ -61,6 +65,9 @@ def vk_try_get_url(item, session):
         url = url.replace('https://www.youtube.com/embed/', '')
         url = 'https://www.youtube.com/watch?v=' + url
         videos_vk.append(url)
+        video_day = item['date']//60//60//24
+        if (video_day == day_today):
+            video_posted_today += 1
     except:
         pass
 
@@ -94,9 +101,22 @@ def main():
         print(error_msg)
         return
     
-    #post_to_vk(videos[-1], vk_session)
     vk_get_all_videos(vk_session)
-    print(videos_vk, videos_youtube[-1])
-    
+
+    print ("Today we posted", video_posted_today, "videos")
+    if (video_posted_today >= int(Config['Vk']['VideosPerDay'])):
+        print("Posting limit done")
+        return
+
+    # disjunction
+    videos_to_post = [item for item in videos_youtube if item not in videos_vk]
+
+    videos_count = int(Config['Vk']['VideosCount'])
+   
+    # this algo to take first 5 videos from list
+    for video in videos_to_post[-1:-(videos_count+1):-1]:
+        print("Posting:", video)
+        post_to_vk(video, vk_session)
+
 if __name__ == "__main__":
     main()
