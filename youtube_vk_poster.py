@@ -47,7 +47,7 @@ def post_to_vk(message, session):
         return
 
     vk = session.get_api()
-    vk.wall.post(owner_id=Config['Vk']['Owner'], from_group=1, attachments=message)
+    vk.wall.post(owner_id=Config['Vk']['Owner'], from_group=1, message=message)
 
 def vk_try_get_url(item, session):
     global videos_vk
