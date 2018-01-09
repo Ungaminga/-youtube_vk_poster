@@ -80,6 +80,12 @@ def main():
     login = Config['Vk']['Login']
     password = Config['Vk']['Password']
     app_id = Config['Vk']['AppId']
+    if Config['Vk']['Socks5IP']:
+        import socks
+        import socket
+        socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, Config['Vk']['Socks5IP'], int(Config['Vk']['Socks5Port']))
+        socket.socket = socks.socksocket
+
     vk_session = vk_api.VkApi(login, password, app_id=app_id)
 
     try:
