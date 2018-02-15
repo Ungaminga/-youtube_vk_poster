@@ -3,6 +3,11 @@
 [YouTube]
 ApiKey = # Апи ключ отсюда: https://console.developers.google.com/apis/api/youtube.googleapis.com следуя этому мануалу: https://developers.google.com/youtube/v3/getting-started
 ChannelId = # https://www.youtube.com/channel/-> ID <- То, что после слэшей.
+Ignore = # Ссылка на видео, которое мы не хотим, чтобы попадало в пул.
+Через энтер + таб мы добавляем несколько видео, к примеру:
+= https://www.youtube.com/watch?v=1Aje6TPKYK4
+		 https://www.youtube.com/watch?v=1Aje6TPKYK4
+так-же с ChannelId, там тоже список каналов.
 
 [Vk]
 Login = # Твой логин

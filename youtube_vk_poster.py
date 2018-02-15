@@ -18,9 +18,8 @@ import time
 day_today = int(time.time())//60//60//24
 video_posted_today = 0 # count of videos was posted this day
 
-def get_all_video_in_channel():
+def get_all_video_in_channel(channel_id):
     api_key = Config['YouTube']['ApiKey']
-    channel_id = Config['YouTube']['ChannelId']
 
     base_video_url = 'https://www.youtube.com/watch?v='
     base_search_url = 'https://www.googleapis.com/youtube/v3/search?'
@@ -82,11 +81,15 @@ def main():
     if (Config.sections() != ['YouTube', 'Vk']):
         print("Wrong Configs")
         return
-    videos_youtube = get_all_video_in_channel()
+
+    videos_youtube = []
+    for channel_id in Config['YouTube']['ChannelId'].split('\n'):
+        videos_youtube += get_all_video_in_channel(channel_id)
 
     login = Config['Vk']['Login']
     password = Config['Vk']['Password']
     app_id = Config['Vk']['AppId']
+    ignore = Config['YouTube']['Ignore'].split('\n')
     if Config['Vk']['Socks5IP']:
         import socks
         import socket
@@ -109,7 +112,7 @@ def main():
         return
 
     # disjunction
-    videos_to_post = [item for item in videos_youtube if item not in videos_vk]
+    videos_to_post = [item for item in videos_youtube if (item not in videos_vk+ignore)]
 
     videos_count = int(Config['Vk']['VideosCount'])
    
