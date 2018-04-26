@@ -18,6 +18,8 @@ import time
 day_today = int(time.time())//60//60//24
 video_posted_today = 0 # count of videos was posted this day
 
+from multiprocessing import Pool
+
 def get_all_video_in_channel(channel_id):
     api_key = Config['YouTube']['ApiKey']
 
@@ -52,29 +54,40 @@ def post_to_vk(message, session):
     vk = session.get_api()
     vk.wall.post(owner_id=Config['Vk']['Owner'], from_group=1, message=message)
 
-def vk_try_get_url(item, session):
-    global videos_vk, video_posted_today
-    try:
-        vk = session.get_api()
-        id = item['attachments'][0]['video']['id']
-        videos_str = Config['Vk']['Owner']+"_"+str(id)
-        video = vk.video.get(videos=videos_str)
-        url = video['items'][0]['player']
-        url = url.replace('?__ref=vk.api', '')
-        url = url.replace('https://www.youtube.com/embed/', '')
-        url = 'https://www.youtube.com/watch?v=' + url
-        videos_vk.append(url)
-        video_day = item['date']//60//60//24
-        if (video_day == day_today):
-            video_posted_today += 1
-    except:
-        pass
+def vk_try_get_url(item):
+    global video_posted_today
+    if 'attachments' not in item or 'video' not in item['attachments'][0]:
+        return
+
+    id = item['attachments'][0]['video']['id']
+    videos_str = Config['Vk']['Owner']+"_"+str(id)
+    video_day = item['date']//60//60//24
+    if (video_day == day_today):
+        video_posted_today += 1
+    return videos_str
+
+def vk_video_to_youtube(video):
+    s = str(urllib.request.urlopen('https://vk.com/video'+video).read())
+    i1 = s.find("ajax.preload")
+    i1 = s.find("www.youtube.com", i1)
+    i2 = s.find("?enablejsapi", i1)
+    return 'https://www.youtube.com/watch?v='+s[i1+len("www.youtube.com\/embed\/\/"):i2]
 
 def vk_get_all_videos(session):
+    global videos_vk
     tools = vk_api.VkTools(session)
     wall = tools.get_all('wall.get', 100, {'owner_id': Config['Vk']['Owner']})
-    for item in wall['items']:
-        vk_try_get_url(item, session)
+    videos = map(vk_try_get_url, wall['items'])
+    videos = list(
+            filter(None, 
+                 list(videos))
+              )
+    pool = Pool()
+    videos_vk = pool.map(vk_video_to_youtube, videos)
+    pool.close()
+    pool.join()
+   #print(videos_vk)
+
 
 def main():
     Config.read("conf.ini")
@@ -83,7 +96,8 @@ def main():
         return
 
     videos_youtube = []
-    for channel_id in Config['YouTube']['ChannelId'].split('\n'):
+    for channel_id in Config['YouTube']['ChannelId'].split('\n')[::-1]:
+        print ("Getting videos for", channel_id)
         videos_youtube += get_all_video_in_channel(channel_id)
 
     login = Config['Vk']['Login']
@@ -104,6 +118,7 @@ def main():
         print(error_msg)
         return
     
+    print ("Retriving all videos from vk")
     vk_get_all_videos(vk_session)
 
     print ("Today we posted", video_posted_today, "videos")
