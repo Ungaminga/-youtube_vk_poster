@@ -3,5 +3,5 @@
 
 Требуемые библиотеки:
 * [vk_api](https://github.com/python273/vk_api)
-* `urllib3`, `json`, `time`, `configparser`.
+* `urllib3`, `json`, `time`, `configparser`, `multiprocessing`.
 * Если используете tor для поста в контакт, вам нужен будет `PySocks3`.
