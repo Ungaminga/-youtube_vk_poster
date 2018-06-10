@@ -32,7 +32,8 @@ def get_all_video_in_channel(channel_id):
     url = first_url
     while True:
         inp = urllib.request.urlopen(url)
-        resp = json.load(inp)
+        inp2 = inp.read().decode('utf-8')
+        resp = json.loads(inp2)
 
         for i in resp['items']:
             if i['id']['kind'] == "youtube#video":
@@ -48,7 +49,7 @@ def get_all_video_in_channel(channel_id):
 def post_to_vk(message, session):
     # hack for youtube: we cant have correct link if we not upload this as video
     if (message.startswith("https://www.youtube.com")):
-        vk_api.VkUpload(session).video(group_id=Config['Vk']['Owner'][1:], link=message)
+        vk_api.VkUpload(session).video(group_id=Config['Vk']['Owner'][1:], link=message, is_private=False, wallpost=False)
         return
 
     vk = session.get_api()
