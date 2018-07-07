@@ -16,9 +16,7 @@ videos_vk = []
 
 import time
 day_today = int(time.time())//60//60//24
-video_posted_today = 0 # count of videos was posted this day
-
-from multiprocessing import Pool
+video_posted_today = 0  # count of videos was posted this day
 
 def get_all_video_in_channel(channel_id):
     api_key = Config['YouTube']['ApiKey']
@@ -67,28 +65,31 @@ def vk_try_get_url(item):
         video_posted_today += 1
     return videos_str
 
-def vk_video_to_youtube(video):
-    s = str(urllib.request.urlopen('https://vk.com/video'+video).read())
-    i1 = s.find("ajax.preload")
-    i1 = s.find("www.youtube.com", i1)
-    i2 = s.find("?enablejsapi", i1)
-    return 'https://www.youtube.com/watch?v='+s[i1+len("www.youtube.com\/embed\/\/"):i2]
-
 def vk_get_all_videos(session):
     global videos_vk
     tools = vk_api.VkTools(session)
     wall = tools.get_all('wall.get', 100, {'owner_id': Config['Vk']['Owner']})
-    videos = map(vk_try_get_url, wall['items'])
-    videos = list(
+    videos = list(map(vk_try_get_url, wall['items']))
+    
+    videos = list(     # removing None elements
             filter(None, 
                  list(videos))
               )
-    pool = Pool()
-    videos_vk = pool.map(vk_video_to_youtube, videos)
-    pool.close()
-    pool.join()
-   #print(videos_vk)
 
+    vk = session.get_api()
+    
+    # Note: vk.video.get can recive maximum 100 elements
+    for i in range(0, len(videos), 200):
+        videos_str = (", ".join(videos[i:i+200]))    # join to comma separated string
+
+        # getting youtube links thru api
+        video_get_output = vk.video.get(videos=videos_str, count=200)
+        for video in video_get_output['items']:
+            url = video['player']
+            url = url.replace('?__ref=vk.api', '')
+            url = url.replace('https://www.youtube.com/embed/', '')
+            url = 'https://www.youtube.com/watch?v=' + url
+            videos_vk.append(url)
 
 def main():
     Config.read("conf.ini")
@@ -97,10 +98,13 @@ def main():
         return
 
     videos_youtube = []
-    for channel_id in Config['YouTube']['ChannelId'].split('\n')[::-1]:
-        print ("Getting videos for", channel_id)
-        videos_youtube += get_all_video_in_channel(channel_id)
 
+    for channel_id in Config['YouTube']['ChannelId'].split('\n')[::-1]:
+        print ("Getting videos for", channel_id, end='')
+        videos_youtube_current = get_all_video_in_channel(channel_id)
+        print (", count =", len(videos_youtube_current))
+        videos_youtube += videos_youtube_current
+        
     login = Config['Vk']['Login']
     password = Config['Vk']['Password']
     app_id = Config['Vk']['AppId']
@@ -131,7 +135,9 @@ def main():
     videos_to_post = [item for item in videos_youtube if (item not in videos_vk+ignore)]
 
     videos_count = int(Config['Vk']['VideosCount'])
-   
+
+    #print (videos_vk, len(videos_vk))
+
     # this algo to take first 5 videos from list
     for video in videos_to_post[-1:-(videos_count+1):-1]:
         print("Posting:", video)
