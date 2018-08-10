@@ -1,5 +1,8 @@
 # Переименуй меня в conf.ini и удали строки с комментариями
 
+[Global]
+Continuous = 0 # При 1 - зацикливание для хероку
+
 [YouTube]
 ApiKey = # Апи ключ отсюда: https://console.developers.google.com/apis/api/youtube.googleapis.com следуя этому мануалу: https://developers.google.com/youtube/v3/getting-started
 ChannelId = # https://www.youtube.com/channel/-> ID <- То, что после слэшей.

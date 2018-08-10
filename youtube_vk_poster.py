@@ -93,7 +93,7 @@ def vk_get_all_videos(session):
 
 def main():
     Config.read("conf.ini")
-    if (Config.sections() != ['YouTube', 'Vk']):
+    if (Config.sections() != ['Global', 'YouTube', 'Vk']):
         print("Wrong Configs")
         return
 
@@ -145,3 +145,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+    # For heroku scheduler
+    if int(Config['Global']['Continuous']) > 0:
+        print ('Looping')
+        while True:
+            time.sleep(1)
