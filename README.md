@@ -1,5 +1,5 @@
 Использование: Прочитайте [conf.ini.dist](conf.ini.dist), исправьте под себя.
-Я использую этот скрипт (пока) у себя в планировщике задач Windows.
+Я использую этот скрипт в связке с [Process Scheduler](https://elements.heroku.com/addons/process-scheduler).
 
 Требуемые библиотеки:
 * [vk_api](https://github.com/python273/vk_api)
